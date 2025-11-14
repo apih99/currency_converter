@@ -1,19 +1,46 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const cheerio = require('cheerio');
 require('dotenv').config();
 
-const API_KEY = process.env.API_KEY;
 let ratesCache = null;
 
+const ECB_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
+
+const fetchRatesfromECB = async () => {
+    try {
+        console.log('Fetching data from our own scraper (ECB)...');
+        const response = await axios.get(ECB_URL);
+        const xmlData = response.data;
+
+        const $ = cheerio.load(xmlData, { xmlMode: true });
+
+        const rates = {};
+        $('Cube[currency]').each((i, element) => {
+            const currency = $(element).attr('currency');
+            const rate = $(element).attr('rate');
+            rates[currency] = parseFloat(rate)
+        });
+        rates['EUR'] = 1
+
+        console.log('Successfully parsed rates with our scraper.');
+        return rates;
+    } catch (error) {
+        console.error('Our scraper failed to fetch or parse rates:', error.message);
+        return null;
+    }
+};
+
 const getLatestRates = async () => {
-  try {
-    const response = await axios.get(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/EUR`);
-    ratesCache = response.data.conversion_rates;
-    console.log('Refreshed latest rates cache.');
-  } catch (error) {
-    console.error('Failed to fetch latest rates:', error.message);
-  }
+    const newRates = await fetchRatesfromECB();
+
+    if (newRates) {
+        ratesCache = newRates;
+        console.log('Refreshed latest rates cache using our own data source.');
+    } else {
+        console.log('Could not refresh rates cache, using stale data.')
+    }
 };
 
 getLatestRates();
