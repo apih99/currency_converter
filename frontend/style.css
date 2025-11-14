@@ -167,7 +167,6 @@ section:last-child {
 }
 
 /* Converter Styles */
-/* --- THIS IS THE CORRECTED CODE FOR THE CONVERTER --- */
 .converter-inputs {
   display: flex;
   gap: 1rem;
@@ -177,10 +176,14 @@ section:last-child {
 /* Directly target the inputs inside the specific form groups */
 .form-group-currency input {
     width: 80px; /* Set a fixed width for the currency inputs */
+    text-transform: uppercase;
 }
 
 .form-group-amount input {
-    width: 87px; /* Set a fixed width for the amount input */
+    width: 87px;
+    height: 43px;
+    font-size: 22px;
+    text-align: center; /* Set a fixed width for the amount input */
 }
 
 input[type="number"] {
@@ -237,6 +240,7 @@ input::-webkit-inner-spin-button {
 .favorite-inputs input {
   width: 80px;
   text-align: center;
+  text-transform: uppercase;
 }
 
 #add-favorite-form .btn-small {
